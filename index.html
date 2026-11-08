@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Football IQ | Football Intelligence Centre</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d2e;--panel2:#172438;--line:#26364d;--text:#eef4fb;--muted:#91a2b8;--green:#39d98a;--blue:#6ea8fe;--red:#ff6b78}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,Segoe UI,Arial,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 5vw;border-bottom:1px solid var(--line);background:#0e1828;position:sticky;top:0;z-index:5}
+.brand{display:flex;gap:12px;align-items:center;font-weight:800;letter-spacing:.08em}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#39d98a,#168b67);display:grid;place-items:center;color:#07150f;font-weight:900}
+.status{font-size:12px;color:var(--green);border:1px solid #23694d;padding:5px 10px;border-radius:99px}
+main{max-width:1280px;margin:auto;padding:30px 5vw 70px}.eyebrow{color:var(--green);font-size:12px;letter-spacing:.16em;font-weight:800}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.1;margin:8px 0} .sub{color:var(--muted);margin:0 0 26px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}nav button,.action{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 15px;cursor:pointer}
+nav button.active{background:#173d35;border-color:#2c8b66;color:#8af0bd}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.metric{font-size:28px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}.section{margin-top:22px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}h2{font-size:19px;margin:0}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px}
+.table-wrap{overflow:auto}.match{display:grid;grid-template-columns:105px 1fr 80px 1fr 90px;gap:12px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line)}
+.match:last-child{border:0}.team{text-align:right}.team.away{text-align:left}.score{text-align:center;font-weight:800;font-size:17px}.league{color:var(--muted);font-size:12px}.tag{font-size:11px;border-radius:99px;padding:3px 8px;background:#26364d;color:#c4d2e2}.live{background:#48232d;color:#ff9ca5}.empty{padding:28px;text-align:center;color:var(--muted)}
+.panel-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}.hidden{display:none}
+footer{padding:22px 5vw;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.notice{background:#192b40;border:1px solid #31506f;padding:12px 14px;border-radius:12px;color:#c6d9ee;margin:14px 0}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.panel-grid{grid-template-columns:1fr}}
+@media(max-width:560px){header{padding:14px 4vw}main{padding:24px 4vw}.grid{grid-template-columns:1fr 1fr}.match{grid-template-columns:65px 1fr 55px 1fr;gap:6px;font-size:13px}.match .status-cell{display:none}.metric{font-size:23px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">IQ</div><span>FOOTBALL IQ</span></div><div class="status" id="apiStatus">● CONNECTING</div></header>
+<main>
+<div class="eyebrow">FOOTBALL INTELLIGENCE CENTRE</div>
+<h1>See the game beyond the score.</h1>
+<p class="sub">Fixtures, live match centre and football data — in one place.</p>
+<div class="grid">
+ <div class="card"><div class="muted">Today's fixtures</div><div class="metric" id="fixtureCount">—</div><div class="muted">Matches returned by API</div></div>
+ <div class="card"><div class="muted">Live matches</div><div class="metric" id="liveCount">—</div><div class="muted">Currently in play</div></div>
+ <div class="card"><div class="muted">Backend</div><div class="metric" style="font-size:20px" id="backendMetric">Checking</div><div class="muted">Cloudflare Worker</div></div>
+ <div class="card"><div class="muted">Cache</div><div class="metric" style="font-size:20px" id="cacheMetric">—</div><div class="muted">Response header status</div></div>
+</div>
+<nav aria-label="Dashboard sections">
+ <button class="active" data-tab="fixtures">Fixtures</button><button data-tab="live">Live centre</button><button data-tab="standings">Standings</button><button data-tab="analysis">Analysis</button><button data-tab="predictions">Predictions</button>
+</nav>
+<section id="fixtures" class="section">
+ <div class="section-head"><h2>Fixtures</h2><div class="toolbar"><input type="date" id="datePicker"><button class="action" id="refreshBtn">Refresh</button></div></div>
+ <div class="card"><div class="table-wrap" id="matches"><div class="empty">Loading fixtures…</div></div></div>
+</section>
+<section id="live" class="section hidden"><div class="section-head"><h2>Live match centre</h2></div><div class="card" id="liveMatches"><div class="empty">Live matches will appear here when returned by the API.</div></div></section>
+<section id="standings" class="section hidden"><h2>League standings</h2><div class="notice">Standings view is prepared. We need to confirm the Worker standings endpoint before connecting league tables.</div></section>
+<section id="analysis" class="section hidden"><h2>Match analysis</h2><div class="notice">Team form, head-to-head and match statistics will be connected after we confirm the available API routes.</div></section>
+<section id="predictions" class="section hidden"><h2>Predictions</h2><div class="notice">Prediction probabilities will be added as an analytical feature. They will be clearly labelled as estimates, not guaranteed outcomes.</div></section>
+<div class="notice" id="errorNotice" hidden></div>
+</main>
+<footer>Football IQ • Initial frontend foundation • Data supplied by your Football IQ API</footer>
+<script>
+const API_BASE = "https://football-iq-api.nakalemasalima250.workers.dev";
+const $ = id => document.getElementById(id);
+const today = new Date();
+$("datePicker").value = new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+function fixtureArray(json){ if(Array.isArray(json?.response)) return json.response; if(Array.isArray(json?.fixtures)) return json.fixtures; if(Array.isArray(json?.data)) return json.data; return []; }
+function teamName(x){return x?.team?.name || x?.name || "TBC"}
+function scoreText(x){const h=x?.goals?.home ?? x?.score?.fulltime?.home;const a=x?.goals?.away ?? x?.score?.fulltime?.away;return h==null||a==null?"—":`${h} - ${a}`}
+function statusText(x){return x?.fixture?.status?.short || x?.status?.short || x?.fixture?.status?.long || "Scheduled"}
+function renderMatches(items,target){if(!items.length){$(target).innerHTML='<div class="empty">No fixtures were returned for this date.</div>';return}
+$(target).innerHTML=items.map(x=>{const f=x.fixture||x;const league=x.league?.name||x.competition?.name||"Football";const home=teamName(x.teams?.home||x.homeTeam);const away=teamName(x.teams?.away||x.awayTeam);const st=statusText(x);const live=!["NS","TBD","FT","AET","PEN"].includes(st);return `<div class="match"><div><div class="league">${league}</div><span class="tag ${live?'live':''}">${st}</span></div><div class="team">${home}</div><div class="score">${scoreText(x)}</div><div class="team away">${away}</div><div class="status-cell muted">${f.date?new Date(f.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):''}</div></div>`}).join("");}
+async function loadFixtures(){const date=$("datePicker").value; $("matches").innerHTML='<div class="empty">Loading fixtures…</div>';$("errorNotice").hidden=true;
+try{const url=`${API_BASE}/api/fixtures?date=${encodeURIComponent(date)}`;const response=await fetch(url);const cache=response.headers.get("x-football-iq-cache")||"Not exposed";if(!response.ok)throw new Error(`API returned HTTP ${response.status}`);const data=await response.json();const items=fixtureArray(data);$("apiStatus").textContent="● API ONLINE";$("apiStatus").style.color="var(--green)";$("backendMetric").textContent="Online";$("cacheMetric").textContent=cache;$("fixtureCount").textContent=data.results ?? items.length;
+const live=items.filter(x=>{const s=statusText(x);return !["NS","TBD","FT","AET","PEN"].includes(s)});$("liveCount").textContent=live.length;renderMatches(items,"matches");renderMatches(live,"liveMatches");
+}catch(e){$("apiStatus").textContent="● API ISSUE";$("apiStatus").style.color="var(--red)";$("backendMetric").textContent="Check API";$("matches").innerHTML='<div class="empty">Could not load fixtures.</div>';$("errorNotice").hidden=false;$("errorNotice").textContent=`${e.message}. Check that the Worker endpoint is available and permits browser requests (CORS).`;}}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));$(b.dataset.tab).classList.remove("hidden")}));
+$("refreshBtn").addEventListener("click",loadFixtures);$("datePicker").addEventListener("change",loadFixtures);loadFixtures();
+</script>
+</body></html>
